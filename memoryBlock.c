@@ -6,6 +6,12 @@ memory_block* head = NULL;
 memory_block* tail = NULL;
 pthread_mutex_t global_malloc_lock;
 
+
+/*
+    *Returns a free block of memory of size >= size
+    *If no such block is found, returns NULL
+
+*/
 memory_block* get_free_block(size_t size) {
     memory_block* curr = head;
 
