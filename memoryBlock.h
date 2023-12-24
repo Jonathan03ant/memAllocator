@@ -7,7 +7,7 @@
 typedef char ALIGN[16];
 
 /*
-    *Header is a representation of the block of memory that is to be allocated
+    *Header is a representation(Meta-Data) of the block of memory that is to be allocated
     *It contains 
         --> the size of the block of memory
         --> a pointer to the next block of memory (header itself)
@@ -23,13 +23,40 @@ union header {
     ALIGN stub;
 };
 
-typedef union header memory_block;
+typedef union header memory_blockHeader;
 
-extern memory_block* head;
-extern memory_block* tail;
+extern memory_blockHeader* head;
+extern memory_blockHeader* tail;
 
 extern pthread_mutex_t global_malloc_lock;
 
-memory_block* get_free_block(size_t size);
+memory_blockHeader* get_free_block(size_t size);
 
 #endif // MEMORY_BLOCK_H
+
+/*
+
+
+
++-----------------+-----------------+            
+|    Header 1     |  Memory Block 1 |  
++-----------------+-----------------+
+| size            |                 | 
+| is_free         |                 |              
+| next            |                 | 
++-----------------+-----------------+
+    |
+    |
+    |           return (void*)(header + 1);
+    |
+   next
++-----------------+-----------------+
+|    Header 2     |  Memory Block 2 |  
++-----------------+-----------------+
+| size            |                 | 
+| is_free         |                 |              
+| next ---------> |                 | 
++-----------------+-----------------+
+
+
+*/

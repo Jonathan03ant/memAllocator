@@ -2,8 +2,8 @@
 #include <stdio.h>
 
 
-memory_block* head = NULL;
-memory_block* tail = NULL;
+memory_blockHeader* head = NULL;
+memory_blockHeader* tail = NULL;
 pthread_mutex_t global_malloc_lock;
 
 
@@ -12,8 +12,8 @@ pthread_mutex_t global_malloc_lock;
     *If no such block is found, returns NULL
 
 */
-memory_block* get_free_block(size_t size) {
-    memory_block* curr = head;
+memory_blockHeader* get_free_block(size_t size) {
+    memory_blockHeader* curr = head;
 
     while (curr){
         if (curr->mem.is_free && curr->mem.size >= size)
@@ -30,7 +30,7 @@ memory_block* get_free_block(size_t size) {
 int main() {
     size_t size = 10;
 
-    memory_block* debug_block = malloc(sizeof(memory_block));
+    memory_blockHeader* debug_block = malloc(sizeof(memory_blockHeader));
     debug_block->mem.size = size;
     debug_block->mem.is_free = 1;
     debug_block->mem.next = NULL;
@@ -38,7 +38,7 @@ int main() {
     head = debug_block;
 
     size_t try = 5;
-    memory_block* block = get_free_block(try);
+    memory_blockHeader* block = get_free_block(try);
     if (block == NULL) {
         printf("No free block found.\n");
     } else {
