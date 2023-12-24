@@ -26,8 +26,7 @@ memory_blockHeader* get_free_block(size_t size) {
 
 /*
     *Debugging purpose olnly
-*/
-int main() {
+    int main() {
     size_t size = 10;
 
     memory_blockHeader* debug_block = malloc(sizeof(memory_blockHeader));
@@ -48,3 +47,4 @@ int main() {
     free(block);
     return 0;
 }
+*/
