@@ -18,6 +18,7 @@ Copy everything inside the src file and paste it in to the root of your own work
 J_allocator.h
 allocator.h
 memoryBlock.h
+libj_allocator.a
 ```
 ## Usage
 To use memAllocator, include the J_allocator.h header in your C source files and link against the static library libj_allocator.a:
