@@ -15,7 +15,7 @@ cd src
 Copy everything inside the src file and paste it in to the root of your own working directory where you are writing your codes. The files include three header files, and a static library.
 ```bash
 
-J_allocator.h
+j_allocator.h
 allocator.h
 memoryBlock.h
 libj_allocator.a
