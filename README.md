@@ -50,7 +50,18 @@ all: $(EXECS)
 program: $(OBJS)
 	gcc $(OBJS) $(LDFLAGS) -o program
 ```
-Please go to this pdf file to read more about the implementation and testing process!
+## Note
+To make your own library from the source code, compile the allocator.c and the memoryblock.c code in to an object code first
+```bash
+gcc -c allocator.c -o allocator.o
+gcc -c memoryBlock.c -o memoryBlock.o
+```
+Next, make your own static library (.a) with the following command
+```bash
+ar rcs libj_allocator.a allocator.o memoryBlock.o
+```
+
+### Documentation on progress....
 
 
 
