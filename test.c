@@ -50,7 +50,6 @@ int main() {
         return 0;
     }
     
-    free(ptr);
     printf("\n\n");
 
 
