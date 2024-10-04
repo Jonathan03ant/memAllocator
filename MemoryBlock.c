@@ -25,7 +25,7 @@ union MemoryBlock {
     ALIGN stub;
 };
 typedef union MemoryBlock MemoryBlock;
-pthread_mutex_t global_malloc_lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t global_memory_lock = PTHREAD_MUTEX_INITIALIZER;
 
 MemoryBlock* head = NULL;
 MemoryBlock* tail = NULL;
@@ -53,6 +53,13 @@ MemoryBlock* find_free_memory_block(size_t size){
 #endif // MEMORY_BLOCK_H
 
 /*
+        Diagram for a single memory block
++-------------------------+-------------------+-------------------+-----------------------+
+| block_size (MD)         | is_free (MD)      | nextBlock (MD)    | Actual Usable Memory |
++-------------------------+-------------------+-------------------+-----------------------+
+|  64 bytes               |      1 (free)     |    (pointer)      | (block + 1) -> usable memory |
++-------------------------+-------------------+-------------------+-----------------------+
+
 
         Diagram of the a typical Memory Block
 +-----------------+-----------------+-------------------------------------+--------------------------------------------------+           
