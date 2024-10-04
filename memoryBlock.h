@@ -6,57 +6,48 @@
 
 typedef char ALIGN[16];
 
-/*
-    *Header is a representation(Meta-Data) of the block of memory that is to be allocated
-    *It contains 
-        --> the size of the block of memory
-        --> a pointer to the next block of memory (header itself)
-        --> memory marker to check if the block of memory is free or not
-*/
+                                                        /*
+                                                            * MemoryBlock is a union that contains 
+                                                                -> Struct or META_DATA of the memory block 
+                                                                    * Including nextBlock (pointer to the next block of memory)
+                                                                -> Padding or ALIGN
+                                                            * Union allows the memory block to either be used as struct or as a padding(ALGIN)
+                                                            * We would never need more than MemoryBlock access at a time (We might however need to store different types of datas)
+                                                                * So, we use union to store the data in the same memory location
+                                                        */
 
-union header {
-    struct {
-        size_t size;
+union MemoryBlock {
+    struct{
+        size_t block_size;
         unsigned is_free;
-        union header* next;
+        union MemoryBlock* nextBlock;
     } mem;
     ALIGN stub;
 };
 
-typedef union header memory_blockHeader;
-
-extern memory_blockHeader* head;
-extern memory_blockHeader* tail;
+typedef union MemoryBlock MemoryBlock;
+extern union MemoryBlock* head;
+extern union MemoryBlock* tail;
 
 extern pthread_mutex_t global_malloc_lock;
 
-memory_blockHeader* get_free_block(size_t size);
+MemoryBlock* find_free_memory_block(size_t size);
+
 
 #endif // MEMORY_BLOCK_H
 
 /*
 
-
-
-+-----------------+-----------------+            
-|    Header 1     |  Memory Block 1 |  
-+-----------------+-----------------+
-| size            |                 | 
-| is_free         |                 |              
-| next            |                 | 
-+-----------------+-----------------+
-    |
-    |
-    |           return (void*)(header + 1);
-    |
-   next
-+-----------------+-----------------+
-|    Header 2     |  Memory Block 2 |  
-+-----------------+-----------------+
-| size            |                 | 
-| is_free         |                 |              
-| next ---------> |                 | 
-+-----------------+-----------------+
+        Diagram of the Memory Block
++-----------------+-----------------+-------------------------------------+--------------------------------------------------+           
+| MemoryBlock0    |  Memory Block 1 |  Memory Block 2    | Memory Block 3 | Memory Block 4     | Memory Block 5     |
++-----------------+-----------------+-------------------------------------+--------------------------------------------------+
+| size            |                 | size               |                |                    |                    |
+| is_free         |                 | is_free            |                |                    |                    |
+| next----------->|next------------>| next-------------->|next----------->| next-------------->| next-------------->| TAIL
++-----------------+-----------------+-------------------------------------+--------------------------------------------------+
+| ALIGN           | ALIGN           | ALIGN              |                | ALIGN              | ALIGN              |
++-----------------+-----------------+-------------------------------------+--------------------------------------------------+
 
 
 */
