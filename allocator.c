@@ -1,72 +1,54 @@
-#include "memoryBlock.h"
+#include "MemoryBlock.c"
 #include "allocator.h"
 #include <sys/mman.h>
 #include <string.h>
 
+//Global Variables
+extern MemoryBlock* head;
+extern MemoryBlock* tail;
+extern pthread_mutex_t global_memory_lock;
+extern MemoryBlock* find_free_memory_block(size_t size);
+
 /*
-    *Implementing malloc
-        *size is passed, this is the amount of memory block we need to allocate
+    *IMPLEMENTING MALLOC*
+        ** Size is passed, this is the amount of memory block we need to allocate
+        ** Returns a pointer to void* memory block
 */
-void* jalloc (size_t size){
+void* jmalloc (size_t size){
+    pthread_mutex_lock(&global_memory_lock);                                                                // Locking the mutex
+    MemoryBlock* block = find_free_memory_block(size);                                                      // Find a free memory block
 
-    memory_blockHeader* header;
-
-    /* If size is zero, return null */
-
-    if (!size)
-        return NULL;
-    /* *LOCK */
-
-    pthread_mutex_lock(&global_malloc_lock);
-
-        /* 
-            *If a block of memory of size >= size is found, mark it as not free 
-             *Takes in a size to allocate a memory for
-             *Return a pointer to the block of memory
-        */
-    header = get_free_block(size);
-    if (header){
-        header->mem.is_free = 0;
-
-        /* *UNLOCK */
-        pthread_mutex_unlock(&global_malloc_lock);
-        return (void*)(header + 1);
+    if (block){
+        block->memory.is_free = 0;                                                                          // Mark the block as not free
+        pthread_mutex_unlock(&global_memory_lock);                                                          // Unlock the mutex
+        return (void*)(block + 1);                                                                          // Return the pointer to the block
     }
 
-    /* 
-        *If no such block is found, allocate a new block of memory
-            *Calling the OS mmap (MEMORY MAP)--> System Call
-    */
-    size_t total_size;
-    void* block;
-
-    total_size = sizeof(memory_blockHeader) + size;
-    block = mmap(0, total_size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
-    if (block == MAP_FAILED){
-
-        /* *UNLOCK */
-        pthread_mutex_unlock(&global_malloc_lock);
-        return NULL;
+                                                                                                            // At thsi point, we have no free memory block
+                                                                                                            // We need to allocate a new block of memory using sbrk
+    size_t total_size = sizeof(MemoryBlock) + size;                                                         // Total size of the memory block
+    block = sbrk(total_size);                                                                               // Allocate the memory block from the OS
+    if (block == (void*)-1){
+        printf("srbk failed!\n");                                                                           
+        pthread_mutex_unlock(&global_memory_lock);                                                          // Unlock the mutex
     }
+                                                                                                            // Now initialize the memory block
+                                                                                                            // Connect it to the linked list
+    block->memory.block_size = size;
+    block->memory.is_free = 0;
+    block->memory.nextBlock = NULL;
 
-    header = block;
-    header->mem.size = size;
-    header->mem.is_free = 0;
-    header->mem.next = NULL;
+    if (head == NULL){                                                                                      // If the head is NULL, set the head to the block
+        head = block;
+    }
+    if (tail){                                                                                              // If the tail is not NULL means MB is not empty
+        tail->memory.nextBlock = block;
+    }
+    tail = block;
+    pthread_mutex_unlock(&global_memory_lock);        
+    return (void*)(block + 1);
+}                                                    
 
-    /*
-        *Manage the linked list of memory blocks
-    */
-    if (!head)
-        head = header;
-    if (tail)
-        tail->mem.next = header;
-    tail = header;
-
-    /* *UNLOCK */
-    pthread_mutex_unlock(&global_malloc_lock);
-    return (void*)(header + 1);
-}
 
 
 /*
