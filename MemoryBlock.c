@@ -21,24 +21,40 @@ union MemoryBlock {
         size_t block_size;
         unsigned is_free;
         union MemoryBlock* nextBlock;
-    } mem;
+    } memory;
     ALIGN stub;
 };
-
 typedef union MemoryBlock MemoryBlock;
-extern union MemoryBlock* head;
-extern union MemoryBlock* tail;
+pthread_mutex_t global_malloc_lock = PTHREAD_MUTEX_INITIALIZER;
 
-extern pthread_mutex_t global_malloc_lock;
+MemoryBlock* head = NULL;
+MemoryBlock* tail = NULL;
 
-MemoryBlock* find_free_memory_block(size_t size);
+
+/*
+    * FUnction to find free memory block
+    * size_t size: size of the memory block needed
+    * return: MemoryBlock pointer
+*/
+MemoryBlock* find_free_memory_block(size_t size){
+    MemoryBlock* current = head;
+    while (current){
+        if (current->memory.is_free && current->memory.block_size >= size){
+            return current;
+        }
+        current = current->memory.nextBlock;
+    }
+
+    printf("No free memory block found\n");
+    return NULL;
+}
 
 
 #endif // MEMORY_BLOCK_H
 
 /*
 
-        Diagram of the Memory Block
+        Diagram of the a typical Memory Block
 +-----------------+-----------------+-------------------------------------+--------------------------------------------------+           
 | MemoryBlock0    |  Memory Block 1 |  Memory Block 2    | Memory Block 3 | Memory Block 4     | Memory Block 5     |
 +-----------------+-----------------+-------------------------------------+--------------------------------------------------+
@@ -48,6 +64,5 @@ MemoryBlock* find_free_memory_block(size_t size);
 +-----------------+-----------------+-------------------------------------+--------------------------------------------------+
 | ALIGN           | ALIGN           | ALIGN              |                | ALIGN              | ALIGN              |
 +-----------------+-----------------+-------------------------------------+--------------------------------------------------+
-
-
+Rightnow, we have head and tail memory blocks that has this structure but points to NULL
 */
