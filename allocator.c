@@ -47,8 +47,43 @@ void* jmalloc (size_t size){
     tail = block;
     pthread_mutex_unlock(&global_memory_lock);        
     return (void*)(block + 1);
-}                                                    
+} 
 
+
+void jfree(void* block_pointer){
+    if (!block_pointer) {
+        printf("Block is NULL\n");
+        return;
+    }
+
+    pthread_mutex_lock(&global_memory_lock);
+    MemoryBlock* block = (MemoryBlock*)block_pointer -1;
+    block->memory.is_free = 1;
+                                                                                                            // If the block is the tail, release it to the OS
+                                                                                                            // Otherwise, mark it as free cause it causes overhead
+    /*
+    head -> block1 -> block2 -> block3 -> NULL
+                            ^
+                            |
+                          tail (last block)
+    */
+   if (block->memory.nextBlock = NULL){
+        if (brk(block) == -1){
+            printf("brk failed\n");
+        }
+        if (head = block){                                                                                  // If the block is the only block             
+            head = NULL;
+            tail = NULL;
+        } else {
+            MemoryBlock* current = head;
+            while (current->memory.nextBlock != block) {
+                current = current->memory.nextBlock;
+            }
+            current->memory.nextBlock = NULL;
+            tail = current;
+        }
+    }
+}
 
 
 /*
