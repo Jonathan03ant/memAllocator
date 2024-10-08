@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <pthread.h>
+#include <stdio.h>
 
 typedef char ALIGN[16];
 

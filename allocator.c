@@ -2,6 +2,8 @@
 #include "allocator.h"
 #include <sys/mman.h>
 #include <string.h>
+#include <stdio.h>
+#include <unistd.h>
 
 //Global Variables
 extern MemoryBlock* head;
