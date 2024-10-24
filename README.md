@@ -1,7 +1,7 @@
 # Memory Allocator
 
 ## Overview
-This project is a custom memory allocator implemented in C for educational purposes to explore operating system (OS) concepts related to memory management and the system calls needed for low-level memory handling. By recreating the functionality of malloc, calloc, realloc, and free, this library provides insight into how memory is dynamically allocated and managed at the system level.
+This project is a custom memory allocator implemented in C for educational purposes aiming to explore operating system (OS) concepts related to memory management and the system calls needed for low-level memory handling. By recreating the functionality of malloc, calloc, realloc, and free, this library provides insight into how memory is dynamically allocated and managed at the system level.
 
 ## Educational Focus
 - **System Calls**: Demonstrates how system calls like `sbrk()` are used to request memory from the operating system's heap, simulating the behavior of `malloc()`.
@@ -12,8 +12,8 @@ The project serves as a learning tool for studying operating systems, memory man
 
 ## Features
 
-- **Custom dynamic memory allocation** using `sbrk()` (`jmalloc`).
-- **Memory reallocation** (`jrealloc`) with `memcpy()` for copying data.
+- **Custom dynamic memory allocation** using `jmalloc`.
+- **Memory reallocation** using `jrealloc` 
 - **Zero-initialized memory allocation** (`jcalloc`), similar to the standard `calloc()`.
 - **Safe memory deallocation** (`jfree`), tracking memory blocks with a linked list.
 - **Thread-safe memory allocation** with mutexes.
@@ -79,71 +79,63 @@ gcc -o my_program my_program.c -L. -l:jonathanmemoryallocator.a
 
 ## System Calls and OS Concepts
 
+### sbrk(): Requesting Memory From the OS
 
+- The `sbrk()` system call is used to increase the program's heap by a specified number of bytes, simulating how `malloc()` requests memory from the operating system when it runs out of space.
+- The allocator tracks the allocated memory blocks using a linked list, similar to how the kernel manages memory for processes.
 
+### Mutexes and Thread Safety
 
+- In multi-threaded environments, race conditions can occur if multiple threads attempt to allocate memory simultaneously.
+- The library uses mutex locks (`pthread_mutex_lock()` and `pthread_mutex_unlock()`) to ensure thread-safe memory management.
 
+### Block Management Using a Linked List
 
+- Each memory block is represented by a header that stores metadata about the block's size, whether it is free or allocated, and a pointer to the next block.
+- This structure mimics how operating systems track memory allocations, forming a linked list of memory blocks.
 
-## Instalation Setup
-To instal the memory allocator, clone the repository and navigate to the file containing the repository, and the src file.
-```bash
-git clone https://github.com/Jonathan03ant/memAlocator.git
-cd memAlocator
-cd src
-```
-
-Copy everything inside the src file and paste it in to the root of your own working directory where you are writing your codes. The files include three header files, and a static library.
-```bash
-
-j_allocator.h
-allocator.h
-memoryBlock.h
-libj_allocator.a
-```
-## Usage
-To use memAllocator, include the J_allocator.h header in your C source files and link against the static library libj_allocator.a:
+### Example Usage
 
 ```c
-#include "J_allocator.h"
+#include "allocator.h"
+#include <stdio.h>
 
-// ...
+int main() {
+    // Allocate 100 bytes using jmalloc
+    void* ptr = jmalloc(100);
+    if (ptr) {
+        printf("Memory allocated at address: %p\n", ptr);
+    }
 
-void *ptr = jalloc(size);
-// use ptr...
-jfree(ptr);
+    // Resize the block to 200 bytes using jrealloc
+    ptr = jrealloc(ptr, 200);
+    if (ptr) {
+        printf("Memory resized at address: %p\n", ptr);
+    }
+
+    // Free the memory block
+    jfree(ptr);
+    printf("Memory freed.\n");
+
+    return 0;
+}
 ```
 
-After including the header file in your source files, simply compile your code and link the static library like this
+## Testing 
+- The provided `test.c` program can be used to verify the behavior of the custom memory allocator.
+sbrk(): Requesting Memory From the OS
 
+## Compile the test program
 ```bash
-gcc -o my_program my_program.c -L. -lj_allocator
+gcc -o test test.c -L. -l:jonathanmemoryallocator.a
 ```
 
-If you are using a Makefile to build your project, include the static library as LDFLAG and link the LDFLAG in to the executable.
-
+## Run the test
 ```bash
-EXECS = program 
-LDFLAGS =  -L. -lj_allocator
-
-all: $(EXECS)
-
-program: $(OBJS)
-	gcc $(OBJS) $(LDFLAGS) -o program
-```
-## Note
-To make your own library from the source code, compile the allocator.c and the memoryblock.c code in to an object code first
-```bash
-gcc -c allocator.c -o allocator.o
-gcc -c memoryBlock.c -o memoryBlock.o
-```
-Next, make your own static library (.a) with the following command
-```bash
-ar rcs libj_allocator.a allocator.o memoryBlock.o
+./test
 ```
 
-### Documentation on progress....
+## Issues
+For issues + contribution, make a PR request.
 
-
-
-  
+Thanks!
